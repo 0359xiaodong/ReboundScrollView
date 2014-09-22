@@ -10,14 +10,21 @@
         android:id="@+id/rebsv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/holo_purple" >
+        android:background="@android:color/holo_purple"
+        android:scrollbars="none" >
 
         <LinearLayout
             android:id="@+id/llayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:background="@android:color/holo_red_light" >
+            android:background="@android:color/holo_red_light"
+            android:orientation="vertical" >
+
+            <EditText
+                android:id="@+id/edtxt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="abc" />
 
             <ImageView
                 android:layout_width="match_parent"
@@ -90,7 +97,8 @@
                 android:layout_height="match_parent"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_launcher" />
-            <ImageView
+
+            <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:contentDescription="@null"
