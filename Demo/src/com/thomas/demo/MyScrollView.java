@@ -10,20 +10,13 @@ import android.view.animation.TranslateAnimation;
 import android.widget.EditText;
 import android.widget.ScrollView;
 
-/**
- * Bolg :http://blog.csdn.net/aaawqqq?viewmode=contents
- * 
- * @author baozi
- * 
- */
-
 public class MyScrollView extends ScrollView
 {
 	private static final String TAG = MyScrollView.class.getSimpleName();
+	private boolean once = true;
 	public static final int DRAG_UP = 0;
 	public static final int DRAG_DOWN = 1;
 	private int direction;
-	// 拖动的距离 size = 4 的意思 只允许拖动屏幕的1/4
 	private static final int size = 4;
 	private View inner;
 	private float y;
@@ -33,6 +26,8 @@ public class MyScrollView extends ScrollView
 	private int delt;
 	private int offset;
 	private boolean isDrag = false;
+
+	private int innerLeft, innerTop, innerRight, innerBottom;
 
 	public MyScrollView(Context context)
 	{
@@ -64,6 +59,15 @@ public class MyScrollView extends ScrollView
 		}
 		else
 		{
+			if (once)
+			{
+				delt = edtxt.getHeight();
+				innerLeft = 0;
+				innerTop = 0;
+				innerBottom = inner.getMeasuredHeight();
+				innerRight = inner.getMeasuredWidth();
+				once = false;
+			}
 			commOnTouchEvent(ev);
 		}
 		return super.onTouchEvent(ev);
@@ -72,7 +76,6 @@ public class MyScrollView extends ScrollView
 	public void commOnTouchEvent(MotionEvent ev)
 	{
 		int action = ev.getAction();
-		delt = edtxt.getHeight();
 		switch (action)
 		{
 		case MotionEvent.ACTION_DOWN:
@@ -93,7 +96,6 @@ public class MyScrollView extends ScrollView
 
 			if (isNeedAnimation())
 			{
-				Log.e(TAG, "animation");
 				animation();
 			}
 			break;
@@ -108,14 +110,15 @@ public class MyScrollView extends ScrollView
 
 			y = nowY;
 			// 当滚动到最上或者最下时就不会再滚动，这时移动布局
+			Log.v(TAG, "1");
 			if (isNeedMove())
 			{
+				Log.v(TAG, "2");
 				if (normal.isEmpty())
 				{
 					// 保存正常的布局位置
-					normal.set(inner.getLeft(), inner.getTop(),
-							inner.getRight(), inner.getBottom());
-					Log.e(TAG, "normal.top:" + normal.top);
+					normal.set(innerLeft, innerTop, innerRight, innerBottom);
+					Log.v(TAG, "4");
 					return;
 				}
 				int yy = inner.getTop() - deltaY;
@@ -123,10 +126,11 @@ public class MyScrollView extends ScrollView
 				// 移动布局
 				if (isDrag)
 				{
-					Log.e(TAG, "yy:" + yy + "  YYB:"
-							+ (inner.getBottom() - deltaY));
-					inner.layout(inner.getLeft(), yy, inner.getRight(),
-							inner.getBottom() - deltaY);
+					Log.v(TAG, "3");
+					Log.i(TAG, "yy: " + yy + "  innerBottom:" + innerBottom
+							+ "  deltaY:" + deltaY);
+					inner.layout(innerLeft, yy, innerRight, innerBottom
+							+ yy);
 				}
 			}
 			break;
@@ -145,16 +149,13 @@ public class MyScrollView extends ScrollView
 
 		if (isDrag)
 		{
-			Log.e(TAG, "isDrag fromY: " + inner.getTop() + " To:" + normal.top);
 			ta = new TranslateAnimation(0, 0, inner.getTop(), normal.top);
 			ta.setDuration(200);
 			inner.startAnimation(ta);
-			// 设置回到正常的布局位置
-			inner.layout(normal.left, normal.top, normal.right, normal.bottom);
+
 		}
 		else
 		{
-			Log.e(TAG, "is not Drag delt: " + delt);
 			if (direction == DRAG_UP)
 			{
 				scrollTo(0, delt);
@@ -164,7 +165,8 @@ public class MyScrollView extends ScrollView
 				scrollTo(0, 0);
 			}
 		}
-
+		// 设置回到正常的布局位置
+		inner.layout(innerLeft, innerTop, innerRight, innerBottom);
 		normal.setEmpty();
 	}
 
@@ -179,11 +181,11 @@ public class MyScrollView extends ScrollView
 	{
 		offset = inner.getMeasuredHeight() - getHeight();
 		int scrollY = getScrollY();
-
+		Log.d(TAG, "scrollY: " + scrollY + "  delt" + delt + "  offset"
+				+ offset);
+		Log.d(TAG, "inner.getTop(): " + inner.getTop());
 		if (scrollY < delt || scrollY == offset)
 		{
-			Log.e(TAG, "scrollY:" + scrollY + "  delt:" + delt + "  offset:"
-					+ offset);
 			if (scrollY == 0 || scrollY == offset)
 			{
 				isDrag = true;
@@ -194,6 +196,8 @@ public class MyScrollView extends ScrollView
 			}
 			return true;
 		}
+		normal.setEmpty();
 		return false;
 	}
+
 }
